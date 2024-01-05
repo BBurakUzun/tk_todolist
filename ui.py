@@ -1,6 +1,6 @@
 import json
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from tkcalendar import Calendar
 from datetime import datetime
 
@@ -10,58 +10,74 @@ class Window(Tk):
         super().__init__()
         self.geometry("800x450")
 
-        self.goals = self.get_data_from_json()
+        # Python private verisi
+        self.__goals = self.get_data_from_json()
         today = datetime.now()
 
-        self.entry = Entry(self, width=50)
+        self.entry = Entry(self, width=40)
+        self.entry2 = Entry(self, width=40)
         self.add_button = Button(self, width=10, command=lambda: self.add_goal(today), text="Hedef Ekle")
         self.delete_button = Button(self, width=10, command=self.delete_goal, text="Hedef Sil")
         self.calendar = Calendar(self, selectmode="day", year=today.year, month=today.month, day=13, locale="tr.TR")
 
-        self.table = ttk.Treeview(self, columns=("tarih", "hedef"), show="headings")
+        self.table = ttk.Treeview(self, columns=("tarih", "hedef", "etiketler"), show="headings")
         self.table.heading("tarih", text="Tarih")
+        self.table.column("tarih", anchor="w", stretch=NO, width=133)
         self.table.heading("hedef", text="Hedef")
-        self.table_init()
+        self.table.column("hedef", anchor="w", stretch=NO, width=133)
+        self.table.heading("etiketler", text="Etiketler")
+        self.table.column("etiketler", anchor="w", stretch=NO, width=133)
         self.table.bind("<<TreeviewSelect>>", lambda event: self.table_item_select())
+        self.table_init()
 
-        self.calendar.grid(row=0, column=0, padx=20)
-        self.table.grid(row=0, column=1)
-        self.add_button.grid(row=2, column=1)
-        self.delete_button.grid(row=2, column=2)
-        self.entry.grid(row=1, column=1, pady=20)
+        self.calendar.place(x=0, y=50, width=400, height=250)
+        self.table.place(x=400, y=50, width=400, height=250)
+        self.add_button.place(x=400, y=330)
+        self.delete_button.place(x=400, y=395)
+        self.entry.place(x=75, y=335)
+        self.entry2.place(x=75, y=400)
 
     def add_goal(self, today: datetime):
         tarih = self.calendar.get_date()
-        if datetime.strptime(tarih, "%d.%m.%Y") < today:
-            print("LÜTFEN İLERİ BİR TARİH SEÇİNİZ")
+        if self.error_checker(tarih, today):
             return
 
-        if tarih in self.goals:
-            self.goals[tarih].append({"Hedef": self.entry.get()})
-            print(self.goals[tarih])
+        if tarih in self.__goals:
+            self.__goals[tarih].append({"Hedef": self.entry.get()})
+            # print(self.goals[tarih])
         else:
             sozluk = {tarih: [{"Hedef": self.entry.get()}]}
-            self.goals.update(sozluk)
+            self.__goals.update(sozluk)
 
-        self.table.insert(parent="", index=0, values=(tarih, self.goals[tarih][-1]["Hedef"]))
+        self.table.insert(parent="", index=0, values=(tarih, self.__goals[tarih][-1]["Hedef"]))
         self.save_to_json()
         # print(self.goals)
+
+    def error_checker(self, tarih, today: datetime):
+        if datetime.strptime(tarih, "%d.%m.%Y") < today:
+            messagebox.showwarning(title="Geçersiz Tarih", message="LÜTFEN İLERİ BİR TARİH SEÇİNİZ")
+            return True
+        elif self.entry.get() == "":
+            messagebox.showerror(title="Hedef YOK", message="HEDEFINIZI GIRINIZ")
+            return True
+        else:
+            return not messagebox.askyesno(title="Ekleme", message="Hedefi eklemek istediğinizi emin misiniz")
 
     def delete_goal(self):
         for item in self.table_item_select():
             print("len", len(item))
             tarih = str(self.table.item(item)["values"][0])
-            uzunluk = len(self.goals[tarih])
+            uzunluk = len(self.__goals[tarih])
 
             if uzunluk == 1:
-                self.goals.pop(tarih, None)
+                self.__goals.pop(tarih, None)
                 self.table.delete(item)
 
             elif uzunluk > 1:
                 search_dict = {"Hedef": str(self.table.item(item)["values"][1])}
-                for i, search_item in enumerate(self.goals[tarih]):
+                for i, search_item in enumerate(self.__goals[tarih]):
                     if search_item == search_dict:
-                        self.goals[tarih].pop(i)
+                        self.__goals[tarih].pop(i)
                         self.table.delete(item)
                         break
 
@@ -78,7 +94,7 @@ class Window(Tk):
         #
         # print("after Data", new_data)
         with open("goals.json", mode="w") as data_file:
-            json.dump(self.goals, data_file, indent=4)
+            json.dump(self.__goals, data_file, indent=4)
 
     def get_data_from_json(self):
         try:
@@ -92,14 +108,14 @@ class Window(Tk):
         return self.table.selection()
 
     def table_init(self):
-        if self.goals is None:
-            self.goals = {}
+        if self.__goals is None:
+            self.__goals = {}
             return
-        for tarih in self.goals:
+        for tarih in self.__goals:
 
-            if len(self.goals[tarih]) == 1:
-                self.table.insert(parent="", index=0, values=(tarih, self.goals[tarih][-1]["Hedef"]))
+            if len(self.__goals[tarih]) == 1:
+                self.table.insert(parent="", index=0, values=(tarih, self.__goals[tarih][-1]["Hedef"]))
 
-            elif len(self.goals[tarih]) > 1:
-                for hedef in self.goals[tarih]:
+            elif len(self.__goals[tarih]) > 1:
+                for hedef in self.__goals[tarih]:
                     self.table.insert(parent="", index=0, values=(tarih, hedef["Hedef"]))
