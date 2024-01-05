@@ -26,6 +26,8 @@ class Window(ThemedTk):
         self.calendar = Calendar(self, selectmode="day", year=today.year, month=today.month, day=13,
                                  locale="tr.TR", background="#824998", selectbackground="purple")
 
+
+
         self.table = ttk.Treeview(self, columns=("tarih", "hedef", "etiketler"), show="headings")
         self.table.heading("tarih", text="Tarih")
         self.table.column("tarih", anchor="w", stretch=NO, width=133)
@@ -34,12 +36,16 @@ class Window(ThemedTk):
         self.table.heading("etiketler", text="Etiketler")
         self.table.column("etiketler", anchor="w", stretch=NO, width=133)
 
+        self.scroll = ttk.Scrollbar(self.table, command=self.table.yview)
+        self.table.config(yscrollcommand=self.scroll.set)
+
         self.table.bind("<<TreeviewSelect>>", func=lambda event: self.table_item_select())
         self.table_init()
 
         self.header.place(x=0, y=0)
         self.calendar.place(x=0, y=50, width=400, height=250)
         self.table.place(x=400, y=50, width=400, height=250)
+        self.scroll.place(x=380, y=30)
         self.add_button.place(x=400, y=330)
         self.delete_button.place(x=400, y=395)
         self.entry.place(x=75, y=335)
@@ -113,7 +119,8 @@ class Window(ThemedTk):
                 data = json.load(data_file)
                 return data
         except (FileNotFoundError, json.JSONDecodeError):
-            return
+            file = open("goals.json", mode="w")
+            file.close()
 
     def table_item_select(self):
         return self.table.selection()
