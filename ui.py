@@ -69,23 +69,16 @@ class Window(Tk):
         # print(self.goals)
 
     def save_to_json(self):
-        try:
-            with open("goals.json", mode="r") as data_file:
-                data = json.load(data_file)
-        except (FileNotFoundError, json.JSONDecodeError):
-            with open("goals.json", mode="w") as data_file:
-                json.dump(self.goals, data_file, indent=4)
-        else:
-            print("Self.goals", self.goals)
-            # data.update(self.goals)
-            print("Data", data)
-            new_data = {}
-            for key, value in self.goals.items():
-                new_data[key] = value
 
-            print("after Data", new_data)
-            with open("goals.json", mode="w") as data_file:
-                json.dump(new_data, data_file, indent=4)
+        # print("Self.goals", self.goals)
+        # # data.update(self.goals)
+        # new_data = {}
+        # for key, value in self.goals.items():
+        #     new_data[key] = value
+        #
+        # print("after Data", new_data)
+        with open("goals.json", mode="w") as data_file:
+            json.dump(self.goals, data_file, indent=4)
 
     def get_data_from_json(self):
         try:
