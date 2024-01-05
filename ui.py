@@ -45,29 +45,28 @@ class Window(Tk):
 
         self.table.insert(parent="", index=0, values=(tarih, self.goals[tarih][-1]["Hedef"]))
         self.save_to_json()
-        print(self.goals)
+        # print(self.goals)
 
     def delete_goal(self):
-
         for item in self.table_item_select():
-            print("tur", len(self.table_item_select()))
-            tarih = self.table.item(item)["values"][0]
-            uzunluk = len(self.goals[self.table.item(item)["values"][0]])
+            print("len", len(item))
+            tarih = str(self.table.item(item)["values"][0])
+            uzunluk = len(self.goals[tarih])
 
             if uzunluk == 1:
-                del self.goals[tarih]
+                self.goals.pop(tarih, None)
                 self.table.delete(item)
 
             elif uzunluk > 1:
-                search_dict = {"Hedef": self.table.item(item)["values"][1]}
+                search_dict = {"Hedef": str(self.table.item(item)["values"][1])}
                 for i, search_item in enumerate(self.goals[tarih]):
                     if search_item == search_dict:
-                        indis = i
-                        self.goals[tarih].pop(indis)
+                        self.goals[tarih].pop(i)
                         self.table.delete(item)
                         break
 
-        print(self.goals)
+        self.save_to_json()
+        # print(self.goals)
 
     def save_to_json(self):
         try:
@@ -77,10 +76,16 @@ class Window(Tk):
             with open("goals.json", mode="w") as data_file:
                 json.dump(self.goals, data_file, indent=4)
         else:
-            data.update(self.goals)
+            print("Self.goals", self.goals)
+            # data.update(self.goals)
             print("Data", data)
+            new_data = {}
+            for key, value in self.goals.items():
+                new_data[key] = value
+
+            print("after Data", new_data)
             with open("goals.json", mode="w") as data_file:
-                json.dump(data, data_file, indent=4)
+                json.dump(new_data, data_file, indent=4)
 
     def get_data_from_json(self):
         try:
@@ -89,9 +94,6 @@ class Window(Tk):
                 return data
         except (FileNotFoundError, json.JSONDecodeError):
             return
-
-    def delete_from_json(self):
-        pass
 
     def table_item_select(self):
         return self.table.selection()
