@@ -117,7 +117,7 @@ class Window(ThemedTk):
     def finish_goal(self):
         if self.table_item_select():
             messagebox.showinfo(title="Tebrikler", message="Görevi tamamladınız.")
-            print(self.check_var.get())
+            # Checkbox'ı seçilmemiş duruma getirir
             self.check_var.set(0)
             self.delete_goal()
 
@@ -155,3 +155,8 @@ class Window(ThemedTk):
                 for hedef in self.__goals[tarih]:
                     self.table.insert(parent="", index=0,
                                       values=(tarih, hedef["Hedef"], hedef["Etiketler"]))
+
+
+if __name__ == "__main__":
+    window = Window()
+    window.mainloop()
