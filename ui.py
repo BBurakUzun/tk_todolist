@@ -13,7 +13,7 @@ class Window(ThemedTk):
         # Tema ayarlama
         self.set_theme_advanced("radiance", hue=2)
 
-        # Python private veri yapısı
+        # Python private veri yapısına .json'dan veri çekme
         self.__goals = self.get_data_from_json()
         today = datetime.now()
 
