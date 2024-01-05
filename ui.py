@@ -34,7 +34,7 @@ class Window(ThemedTk):
         self.table.heading("etiketler", text="Etiketler")
         self.table.column("etiketler", anchor="w", stretch=NO, width=133)
 
-        self.table.bind("<<TreeviewSelect>>", lambda event: self.table_item_select())
+        self.table.bind("<<TreeviewSelect>>", func=lambda event: self.table_item_select())
         self.table_init()
 
         self.header.place(x=0, y=0)
@@ -53,13 +53,14 @@ class Window(ThemedTk):
             return
 
         if tarih in self.__goals:
-            self.__goals[tarih].append({"Hedef": self.entry.get()})
+            self.__goals[tarih].append({"Hedef": self.entry.get(), "Etiketler": self.entry2.get()})
             # print(self.goals[tarih])
         else:
-            sozluk = {tarih: [{"Hedef": self.entry.get()}]}
+            sozluk = {tarih: [{"Hedef": self.entry.get(), "Etiketler": self.entry2.get()}]}
             self.__goals.update(sozluk)
 
-        self.table.insert(parent="", index=0, values=(tarih, self.__goals[tarih][-1]["Hedef"]))
+        self.table.insert(parent="", index=0, values=(tarih, self.__goals[tarih][-1]["Hedef"],
+                                                      self.__goals[tarih][-1]["Etiketler"]))
         self.save_to_json()
         # print(self.goals)
 
@@ -84,7 +85,7 @@ class Window(ThemedTk):
                 self.table.delete(item)
 
             elif uzunluk > 1:
-                search_dict = {"Hedef": str(self.table.item(item)["values"][1])}
+                search_dict = {"Hedef": str(self.table.item(item)["values"][1]), "Etiketler": str(self.table.item(item)["values"][2])}
                 for i, search_item in enumerate(self.__goals[tarih]):
                     if search_item == search_dict:
                         self.__goals[tarih].pop(i)
@@ -124,8 +125,8 @@ class Window(ThemedTk):
         for tarih in self.__goals:
 
             if len(self.__goals[tarih]) == 1:
-                self.table.insert(parent="", index=0, values=(tarih, self.__goals[tarih][-1]["Hedef"]))
+                self.table.insert(parent="", index=0, values=(tarih, self.__goals[tarih][-1]["Hedef"], self.__goals[tarih][-1]["Etiketler"]))
 
             elif len(self.__goals[tarih]) > 1:
                 for hedef in self.__goals[tarih]:
-                    self.table.insert(parent="", index=0, values=(tarih, hedef["Hedef"]))
+                    self.table.insert(parent="", index=0, values=(tarih, hedef["Hedef"], self.__goals[tarih][-1]["Etiketler"]))
