@@ -157,6 +157,6 @@ class Window(ThemedTk):
                                       values=(tarih, hedef["Hedef"], hedef["Etiketler"]))
 
 
-if __name__ == "__main__":
-    window = Window()
-    window.mainloop()
+
+window = Window()
+window.mainloop()
